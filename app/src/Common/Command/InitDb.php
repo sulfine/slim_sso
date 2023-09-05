@@ -13,7 +13,7 @@ class InitDB extends CommandBase
 
     public function __construct(Container $container)
     {
-        parent::__construct();
+        parent::__construct(Container $container);
     }
 
     protected function configure()
