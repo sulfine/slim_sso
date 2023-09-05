@@ -1,0 +1,36 @@
+{
+    "name": "opteo/auth",
+    "description": "Proxy authenfication SSO pour Opteo",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Sébastien Franzot",
+            "email": "sebastien.franzot@orange.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "slim/slim": "^4.12",
+        "slim/psr7": "^1.6",
+        "php-di/php-di": "^7.0",
+        "slim/twig-view": "^3.3",
+        "slim/flash": "^0.4.0",
+        "monolog/monolog": "^3.4",
+        "doctrine/orm": "^2.16",
+        "doctrine/migrations": "^3.6",
+        "symfony/console": "^6.3",
+        "symfony/cache": "^6.3"
+    },
+    "require-dev": {
+        "semhoun/runtracy": "^0.2.16"
+    }
+}

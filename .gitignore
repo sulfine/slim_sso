@@ -1,0 +1,5 @@
+.vscode
+app/vendor
+app/composer.lock
+data/log/*
+data/mariadb/*

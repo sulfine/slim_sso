@@ -1,0 +1,65 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use DI\ContainerBuilder;
+use Doctrine\Migrations\DependencyFactory;
+use App\Common\Architecture\Setting\Setting;
+use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\Migrations\Configuration\Configuration;
+use Doctrine\Migrations\Configuration\Connection\ExistingConnection;
+use Doctrine\Migrations\Configuration\Migration\ExistingConfiguration;
+use Doctrine\Migrations\Metadata\Storage\TableMetadataStorageConfiguration;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
+
+$rootPath = dirname(__DIR__, 1);
+require $rootPath . '/vendor/autoload.php';
+
+$containerBuilder = new ContainerBuilder();
+
+$settings = require $rootPath . '/config/settings.php';
+$settings($containerBuilder);
+
+$dependencies = require $rootPath . '/config/dependencies.php';
+$dependencies($containerBuilder);
+
+$container = $containerBuilder->build();
+
+$configurationMigration = new Configuration();
+#$configurationMigration->setEntityManagerName($em->getEntityManagerName);
+$configurationMigration->addMigrationsDirectory('App\Migrations', Setting::getRoot() . '/migrations');
+$configurationMigration->setAllOrNothing(true);
+$configurationMigration->setCheckDatabasePlatform(false);
+
+$storageConfigurationMigration = new TableMetadataStorageConfiguration();
+$storageConfigurationMigration->setTableName('migrations');
+
+$configurationMigration->setMetadataStorageConfiguration($storageConfigurationMigration);
+
+$dependencyFactoryMigration = DependencyFactory::fromConnection(
+    new ExistingConfiguration($configurationMigration),
+    new ExistingConnection($container->get('db'))
+);
+
+$commands = [
+    new \App\Common\Command\InitDb($container),
+    new Doctrine\Migrations\Tools\Console\Command\VersionCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\CurrentCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\DiffCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\DumpSchemaCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\ExecuteCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\GenerateCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\LatestCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\ListCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\MigrateCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\RollupCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\StatusCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\SyncMetadataCommand($dependencyFactoryMigration),
+    new Doctrine\Migrations\Tools\Console\Command\UpToDateCommand($dependencyFactoryMigration),
+];
+
+ConsoleRunner::run(
+    new SingleManagerProvider($container->get('entity_manager')),
+    $commands
+);
